@@ -10,7 +10,9 @@
 #include <wx/wx.h>
 #endif
 
-class SudokuGrid : public wxPanel
+#include <wx/grid.h>
+
+class SudokuGrid : public wxGrid
 {
  public:
   SudokuGrid() = default;
@@ -19,7 +21,20 @@ class SudokuGrid : public wxPanel
   ~SudokuGrid() override = default;
 
  private:
-  std::vector<unsigned> m_grid = std::vector<unsigned>(81);
+  void OnSize(wxSizeEvent& event);
+  void OnEditorCreated(wxGridEditorCreatedEvent& event);
+
+  void CenterGrid();
+  wxPen GetColGridLinePen(int col) override;
+  wxPen GetRowGridLinePen(int col) override;
+  int GetGridWidth();
+  int GetGridHeight();
+  void RecalcCellSize();
+  void RecalcFontSize();
+
+
+  wxTextCtrl* openEditor_{nullptr};
+ DECLARE_EVENT_TABLE()
 };
 
 #endif //SUDOKU_SRC_SUDOKUGRID_H_

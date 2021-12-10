@@ -27,6 +27,9 @@ MainWindow::MainWindow(const wxString& title, const wxPoint& pos, const wxSize& 
     SetStatusText( "Welcome to Sudoku!" );
 
     auto* grid = new SudokuGrid(this);
+    auto* szr = new wxBoxSizer(wxHORIZONTAL);
+    szr->Add(grid, wxSizerFlags(1).Align(wxALIGN_CENTER).Expand());
+    this->SetSizer(szr);
 }
 void MainWindow::OnExit(wxCommandEvent& event)
 {
