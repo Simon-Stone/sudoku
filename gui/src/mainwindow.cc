@@ -38,11 +38,11 @@ void MainWindow::OnExit(wxCommandEvent& event)
 void MainWindow::OnAbout(wxCommandEvent& event)
 {
     wxAboutDialogInfo aboutInfo;
-    aboutInfo.SetName("Sudoku");
+    aboutInfo.SetName("SudokuGame");
     aboutInfo.SetVersion("0.0.1");
-    aboutInfo.SetDescription(_("A wxWidgets-based Sudoku game"));
+    aboutInfo.SetDescription(_("A wxWidgets-based SudokuGame game"));
     aboutInfo.SetCopyright("(C) 2021");
-    aboutInfo.SetWebSite("https://github.com/nullpunktTUD/sudoku");
+    aboutInfo.SetWebSite("https://github.com/nullpunktTUD/backend");
     aboutInfo.AddDeveloper("Simon Stone");
     wxAboutBox(aboutInfo);
 }

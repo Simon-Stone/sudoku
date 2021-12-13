@@ -25,12 +25,11 @@ class SudokuGrid : public wxGrid
   void OnEditorCreated(wxGridEditorCreatedEvent& event);
 
   void CenterGrid();
-  wxPen GetColGridLinePen(int col) override;
-  wxPen GetRowGridLinePen(int col) override;
   int GetGridWidth();
   int GetGridHeight();
   void RecalcCellSize();
   void RecalcFontSize();
+  void SetupBorders();
 
 
   wxTextCtrl* openEditor_{nullptr};
