@@ -18,6 +18,8 @@ class Board
   Board() = default;
   explicit Board(const std::array<std::array<unsigned, 9>, 9>& board);
 
+  void Clear();
+
   bool Initialize(unsigned num_clues);
 
   [[nodiscard]] std::array<std::array<unsigned, 9>, 9> GetBoard() const;
@@ -41,9 +43,14 @@ class Board
   [[nodiscard]] std::array<unsigned, 9> GetRow(unsigned rowIdx) const;
   [[nodiscard]] unsigned GetNumberRows() const;
 
+  unsigned GetCell(unsigned rowIdx, unsigned colIdx);
   void SetCell(unsigned rowIdx, unsigned colIdx, unsigned value);
 
   friend std::ostream &operator<<(std::ostream &os, const Board &board);
+  std::array<unsigned, 9> operator[](unsigned i) const;
+  std::array<unsigned, 9>& operator[](unsigned i);
+  bool operator==(const Board &rhs) const;
+  bool operator!=(const Board &rhs) const;
 
  private:
   std::pair<unsigned, unsigned> FindEmptyCell();

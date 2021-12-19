@@ -12,6 +12,7 @@
 
 wxBEGIN_EVENT_TABLE(SudokuGrid, wxGrid)
   EVT_SIZE(SudokuGrid::OnSize)
+  EVT_GRID_CELL_CHANGED(SudokuGrid::OnCellChanged)
   EVT_GRID_EDITOR_CREATED(SudokuGrid::OnEditorCreated)
 wxEND_EVENT_TABLE()
 
@@ -50,11 +51,12 @@ namespace
 
 
 SudokuGrid::SudokuGrid(wxWindow *parent,
+                       sudoku::Board* board,
                        wxWindowID id,
                        const wxPoint &pos,
                        const wxSize &size,
                        long style,
-                       const wxString &name) : wxGrid(parent, id, pos, size, style, name)
+                       const wxString &name) : wxGrid(parent, id, pos, size, style, name), board_(board)
 {
   this->CreateGrid(11, 11);
   this->HideColLabels();
@@ -80,6 +82,8 @@ SudokuGrid::SudokuGrid(wxWindow *parent,
     }
   }
   this->SetCellHighlightROPenWidth(0);
+
+  FillGrid();
 }
 
 void SudokuGrid::OnSize(wxSizeEvent &event)
@@ -88,9 +92,6 @@ void SudokuGrid::OnSize(wxSizeEvent &event)
   {
     openEditor_->Show(false);
   }
-
-  RecalcCellSize();
-  RecalcFontSize();
   CenterGrid();
   event.Skip();
 }
@@ -119,6 +120,8 @@ void SudokuGrid::RecalcCellSize()
 
 void SudokuGrid::CenterGrid()
 {
+  RecalcCellSize();
+  RecalcFontSize();
   // Center the grid on the area available to it
   auto size = this->GetSize();
 
@@ -214,4 +217,44 @@ void SudokuGrid::SetupBorders()
     }
   }
 }
+void SudokuGrid::FillGrid()
+{
+  numFilledCells_ = 0;
+  for (unsigned rowIdx = 0; rowIdx < 9; ++rowIdx)
+  {
+    for (unsigned colIdx = 0; colIdx < 9; ++colIdx)
+    {
+      std::string valueString;
+      if((*board_)[rowIdx][colIdx] != 0)
+      {
+        valueString = std::to_string((*board_)[rowIdx][colIdx]);
+        numFilledCells_++;
+      }
+      this->SetCellValue(rowIdx + 1, colIdx + 1, valueString);
+    }
+  }
+}
+void SudokuGrid::updateWidgets()
+{
+  FillGrid();
+  Refresh();
+}
+void SudokuGrid::OnCellChanged(wxGridEvent &event)
+{
+  (*board_)[event.GetRow() - 1][event.GetCol() - 1] = wxAtoi(this->GetCellValue(event.GetRow(), event.GetCol()));
+  updateWidgets();
+
+  if(numFilledCells_ == 81)
+  {
+    if(board_->CheckBoard())
+    {
+      wxMessageDialog(this, "Congratulations! You solved the board!", "Game Won").ShowModal();
+    }
+    else
+    {
+      wxMessageDialog(this, "Oh no! Your solution is not correct!", "Invalid board", wxICON_ERROR).ShowModal();
+    }
+  }
+}
+
 

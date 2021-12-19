@@ -12,26 +12,33 @@
 
 #include <wx/grid.h>
 
+#include "sudoku.h"
+
 class SudokuGrid : public wxGrid
 {
  public:
   SudokuGrid() = default;
-  explicit SudokuGrid(wxWindow *parent, wxWindowID id=wxID_ANY, const wxPoint &pos=wxDefaultPosition,
+  explicit SudokuGrid(wxWindow *parent, sudoku::Board* board, wxWindowID id=wxID_ANY, const wxPoint &pos=wxDefaultPosition,
              const wxSize &size=wxDefaultSize, long style=wxTAB_TRAVERSAL, const wxString &name=wxPanelNameStr);
   ~SudokuGrid() override = default;
 
+  void updateWidgets();
+
  private:
-  void OnSize(wxSizeEvent& event);
+  void OnCellChanged(wxGridEvent& event);
   void OnEditorCreated(wxGridEditorCreatedEvent& event);
+  void OnSize(wxSizeEvent& event);
 
   void CenterGrid();
+  void FillGrid();
   int GetGridWidth();
   int GetGridHeight();
   void RecalcCellSize();
   void RecalcFontSize();
   void SetupBorders();
 
-
+  sudoku::Board* board_{nullptr};
+  unsigned numFilledCells_;
   wxTextCtrl* openEditor_{nullptr};
  DECLARE_EVENT_TABLE()
 };

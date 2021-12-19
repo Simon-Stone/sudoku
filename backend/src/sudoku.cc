@@ -2,14 +2,16 @@
 // Created by Simon Stone on 12/10/2021.
 //
 
-#include "sudoku.h"
+#include "include/sudoku.h"
 
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <chrono>
 #include <iterator>
+#include <tuple>
 #include <random>
+#include <set>
 #include <string>
 #include <stdexcept>
 
@@ -23,11 +25,44 @@ Board::Board(const std::array<std::array<unsigned, 9>, 9> &board) : board_(board
 
 bool Board::Initialize(unsigned int num_clues)
 {
-  board_ = std::array<std::array<unsigned, 9>, 9>();
+  if (num_clues > 81)
+  {
+    return false;
+  }
+  // Fill board with zeros
+  Clear();
+
+  // Create a random valid board
+  auto solvedBoard = Board();
+  solvedBoard.Solve();
+
+  // Pick correct values from random cells
+  std::set<std::pair<std::pair<unsigned, unsigned>, unsigned>> clueCells;
+  std::uniform_int_distribution<unsigned> range(0, 8);
+  std::random_device r;
+  std::default_random_engine random_engine(r());
+
+  while(clueCells.size() < num_clues)
+  {
+    // Get a random row
+    auto rowIdx = range(random_engine);
+    auto colIdx = range(random_engine);
+    clueCells.insert(std::make_pair(std::make_pair(rowIdx, colIdx), solvedBoard[rowIdx][colIdx]));
+  }
+
+  for (const auto& cell : clueCells)
+  {
+    board_[cell.first.first][cell.first.second] = cell.second;
+  }
   return true;
 }
 bool Board::Solve()
 {
+  // Check if starting board is valid
+  if(!CheckBoard())
+  {
+    return false;
+  }
   std::pair<unsigned, unsigned> pos;  // row index, column index
   try
   {
@@ -251,5 +286,29 @@ std::ostream &sudoku::operator<<(std::ostream &os, const Board &board)
   }
   os << "-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\n";
   return os;
+}
+unsigned Board::GetCell(unsigned int rowIdx, unsigned int colIdx)
+{
+  return board_[rowIdx][colIdx];
+}
+std::array<unsigned, 9> Board::operator[](unsigned i) const
+{
+  return board_[i];
+}
+std::array<unsigned, 9> &Board::operator[](unsigned i)
+{
+  return board_[i];
+}
+void Board::Clear()
+{
+  board_.fill(std::array<unsigned, 9>{0});
+}
+bool Board::operator==(const Board &rhs) const
+{
+  return board_ == rhs.board_;
+}
+bool Board::operator!=(const Board &rhs) const
+{
+  return !(rhs == *this);
 }
 

@@ -11,19 +11,29 @@
 #include <wx/wx.h>
 #endif
 
-class MainWindow: public wxFrame
+#include "sudoku.h"
+#include "sudokugrid.h"
+
+class MainWindow : public wxFrame
 {
-public:
-    MainWindow(const wxString& title, const wxPoint& pos, const wxSize& size);
-private:
-    void OnExit(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-    wxDECLARE_EVENT_TABLE();
+ public:
+  MainWindow(const wxString &title, const wxPoint &pos, const wxSize &size);
+ private:
+  void OnAbout(wxCommandEvent &event);
+  void OnExit(wxCommandEvent &event);
+  void OnNewGame(wxCommandEvent &event);
+  void OnSolve(wxCommandEvent &event);
+
+  void updateWidgets();
+ wxDECLARE_EVENT_TABLE();
+
+ private:
+  SudokuGrid *grid_;
+  sudoku::Board board_;
 };
 enum
 {
-    ID_Hello = 1
+  ID_Hello = 1
 };
-
 
 #endif //SUDOKU_MAINWINDOW_H

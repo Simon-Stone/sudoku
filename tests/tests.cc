@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "sudoku.h"
+#include "include/sudoku.h"
 
 TEST(BackendTest, CheckSection)
 {
@@ -78,15 +78,41 @@ TEST(BackendTests, CheckBoard)
          }});
   EXPECT_TRUE(board.CheckBoard());
 }
+TEST(BackendTests, Clear)
+{
+  sudoku::Board board;
+  board[0][3] = 4;
+  EXPECT_FALSE(board == sudoku::Board());
+  board.Clear();
+  EXPECT_TRUE(board == sudoku::Board());
+}
 
 TEST(BackendTests, Solve)
 {
-  sudoku::Board board;
+  sudoku::Board goodBoard;
 
-  board.SetCell(0, 1, 3);
-  board.SetCell(7, 4, 8);
+  goodBoard.SetCell(0, 1, 3);
+  goodBoard.SetCell(7, 4, 8);
+  std::cout << goodBoard;
+  EXPECT_TRUE(goodBoard.Solve());
+  std::cout << goodBoard;
+  EXPECT_TRUE(goodBoard.CheckBoard());
+
+  sudoku::Board badBoard;
+  badBoard.SetCell(8, 7, 9);
+  badBoard.SetCell(8, 8, 9);
+  EXPECT_FALSE(badBoard.Solve());
+  std::cout << badBoard;
+  EXPECT_FALSE(badBoard.CheckBoard());
+}
+
+TEST(BackendTests, Initialize)
+{
+  sudoku::Board board;
+  board.Initialize(81);
   std::cout << board;
-  EXPECT_TRUE(board.Solve());
+  EXPECT_TRUE(board.CheckBoard());
+  board.Initialize(17);
   std::cout << board;
   EXPECT_TRUE(board.CheckBoard());
 }
