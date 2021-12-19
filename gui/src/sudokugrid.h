@@ -24,9 +24,11 @@ class SudokuGrid : public wxGrid
 
   bool Initialize(unsigned numClues);
   bool Solve();
+  void Redo(unsigned steps = 1);
   void Undo(unsigned steps = 1);
   void updateWidgets();
-  [[nodiscard]] unsigned HistorySize() const;
+  [[nodiscard]] unsigned RedoStepsLeft();
+  [[nodiscard]] unsigned UndoStepsLeft();
 
  private:
   void OnCellChanged(wxGridEvent& event);

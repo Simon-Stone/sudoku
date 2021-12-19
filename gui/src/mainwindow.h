@@ -23,6 +23,7 @@ class MainWindow : public wxFrame
   void OnExit(wxCommandEvent &event);
   void OnNewGame(wxCommandEvent &event);
   void OnSolve(wxCommandEvent &event);
+  void OnRedo(wxCommandEvent &event);
   void OnUndo(wxCommandEvent &event);
   void OnUpdateUI(wxUpdateUIEvent &event);
 

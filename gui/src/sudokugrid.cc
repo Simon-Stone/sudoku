@@ -244,6 +244,7 @@ void SudokuGrid::OnCellChanged(wxGridEvent &event)
 {
   history_.push_back(*board_);
   board_ = std::prev(history_.end());
+  history_.erase(std::next(board_), history_.end());
   (*board_)[event.GetRow() - 1][event.GetCol() - 1] = wxAtoi(this->GetCellValue(event.GetRow(), event.GetCol()));
 
   updateWidgets();
@@ -264,6 +265,7 @@ bool SudokuGrid::Solve()
 {
   history_.push_back(*board_);
   board_ = std::prev(history_.end());
+  history_.erase(std::next(board_), history_.end());
   return board_->Solve();
 }
 bool SudokuGrid::Initialize(unsigned int numClues)
@@ -277,12 +279,24 @@ void SudokuGrid::Undo(unsigned steps)
     return;
   }
   board_ -= steps;
-  history_.erase(std::next(board_), history_.end());
   updateWidgets();
 }
-unsigned SudokuGrid::HistorySize() const
+unsigned SudokuGrid::UndoStepsLeft()
 {
-  return history_.size();
+  return static_cast<unsigned>(std::distance(history_.begin(), board_));
+}
+unsigned SudokuGrid::RedoStepsLeft()
+{
+  return static_cast<unsigned>(std::distance(board_, std::prev(history_.end())));
+}
+void SudokuGrid::Redo(unsigned int steps)
+{
+  if (RedoStepsLeft() < steps)
+  {
+      return;
+  }
+  board_ += steps;
+  updateWidgets();
 }
 
 

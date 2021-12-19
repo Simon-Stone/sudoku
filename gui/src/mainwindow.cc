@@ -10,14 +10,18 @@
 
 static const int ID_NEW_GAME = wxNewId();
 static const int ID_SOLVE = wxNewId();
+static const int ID_REDO = wxNewId();
 static const int ID_UNDO = wxNewId();
+
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
         EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
         EVT_MENU(wxID_EXIT, MainWindow::OnExit)
         EVT_MENU(ID_NEW_GAME, MainWindow::OnNewGame)
         EVT_MENU(ID_SOLVE, MainWindow::OnSolve)
+        EVT_MENU(ID_REDO, MainWindow::OnRedo)
         EVT_MENU(ID_UNDO, MainWindow::OnUndo)
+        EVT_UPDATE_UI(ID_REDO, MainWindow::OnUpdateUI)
         EVT_UPDATE_UI(ID_UNDO, MainWindow::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
@@ -31,6 +35,7 @@ MainWindow::MainWindow(const wxString &title, const wxPoint &pos, const wxSize &
   // ************************************************************
   wxMenu *menuEdit = new wxMenu();
   menuEdit->Append(ID_UNDO, "Undo");
+  menuEdit->Append(ID_REDO, "Redo");
   // ************************************************************
   wxMenu *menuHelp = new wxMenu();
   menuHelp->Append(wxID_ABOUT);
@@ -45,6 +50,7 @@ MainWindow::MainWindow(const wxString &title, const wxPoint &pos, const wxSize &
   // ************************************************************
   auto* toolBar = CreateToolBar();
   toolBar->AddTool(ID_UNDO, "Undo", wxArtProvider::GetBitmap(wxART_UNDO));
+  toolBar->AddTool(ID_REDO, "Redo", wxArtProvider::GetBitmap(wxART_REDO));
   toolBar->Realize();
   // ************************************************************
   CreateStatusBar();
@@ -100,6 +106,11 @@ void MainWindow::OnNewGame(wxCommandEvent &event)
   grid_->Initialize(numClues);
   updateWidgets();
 }
+void MainWindow::OnRedo(wxCommandEvent &event)
+{
+  grid_->Redo();
+  updateWidgets();
+}
 void MainWindow::OnUndo(wxCommandEvent &event)
 {
   grid_->Undo();
@@ -107,7 +118,14 @@ void MainWindow::OnUndo(wxCommandEvent &event)
 }
 void MainWindow::OnUpdateUI(wxUpdateUIEvent &event)
 {
-  event.Enable(grid_->HistorySize() > 1);
+  if(event.GetId() == ID_UNDO)
+  {
+    event.Enable(grid_->UndoStepsLeft() > 0);
+  }
+  else if(event.GetId() == ID_REDO)
+  {
+    event.Enable(grid_->RedoStepsLeft() > 0);
+  }
 }
 
 
