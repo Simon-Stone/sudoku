@@ -51,12 +51,11 @@ namespace
 
 
 SudokuGrid::SudokuGrid(wxWindow *parent,
-                       sudoku::Board* board,
                        wxWindowID id,
                        const wxPoint &pos,
                        const wxSize &size,
                        long style,
-                       const wxString &name) : wxGrid(parent, id, pos, size, style, name), board_(board)
+                       const wxString &name) : wxGrid(parent, id, pos, size, style, name)
 {
   this->CreateGrid(11, 11);
   this->HideColLabels();
@@ -83,6 +82,8 @@ SudokuGrid::SudokuGrid(wxWindow *parent,
   }
   this->SetCellHighlightROPenWidth(0);
 
+  history_.emplace_back();
+  board_ = history_.begin();
   FillGrid();
 }
 
@@ -241,7 +242,11 @@ void SudokuGrid::updateWidgets()
 }
 void SudokuGrid::OnCellChanged(wxGridEvent &event)
 {
+  history_.push_back(*board_);
+  board_ = std::prev(history_.end());
+  history_.erase(std::next(board_), history_.end());
   (*board_)[event.GetRow() - 1][event.GetCol() - 1] = wxAtoi(this->GetCellValue(event.GetRow(), event.GetCol()));
+
   updateWidgets();
 
   if(numFilledCells_ == 81)
@@ -255,6 +260,43 @@ void SudokuGrid::OnCellChanged(wxGridEvent &event)
       wxMessageDialog(this, "Oh no! Your solution is not correct!", "Invalid board", wxICON_ERROR).ShowModal();
     }
   }
+}
+bool SudokuGrid::Solve()
+{
+  history_.push_back(*board_);
+  board_ = std::prev(history_.end());
+  history_.erase(std::next(board_), history_.end());
+  return board_->Solve();
+}
+bool SudokuGrid::Initialize(unsigned int numClues)
+{
+    return board_->Initialize(numClues);
+}
+void SudokuGrid::Undo(unsigned steps)
+{
+  if (std::distance(history_.begin(), board_) < steps)
+  {
+    return;
+  }
+  board_ -= steps;
+  updateWidgets();
+}
+unsigned SudokuGrid::UndoStepsLeft()
+{
+  return static_cast<unsigned>(std::distance(history_.begin(), board_));
+}
+unsigned SudokuGrid::RedoStepsLeft()
+{
+  return static_cast<unsigned>(std::distance(board_, std::prev(history_.end())));
+}
+void SudokuGrid::Redo(unsigned int steps)
+{
+  if (RedoStepsLeft() < steps)
+  {
+      return;
+  }
+  board_ += steps;
+  updateWidgets();
 }
 
 
