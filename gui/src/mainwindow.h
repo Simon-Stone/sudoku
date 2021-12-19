@@ -23,13 +23,13 @@ class MainWindow : public wxFrame
   void OnExit(wxCommandEvent &event);
   void OnNewGame(wxCommandEvent &event);
   void OnSolve(wxCommandEvent &event);
+  void OnUndo(wxCommandEvent &event);
 
   void updateWidgets();
  wxDECLARE_EVENT_TABLE();
 
  private:
   SudokuGrid *grid_;
-  sudoku::Board board_;
 };
 enum
 {

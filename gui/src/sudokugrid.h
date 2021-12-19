@@ -18,16 +18,20 @@ class SudokuGrid : public wxGrid
 {
  public:
   SudokuGrid() = default;
-  explicit SudokuGrid(wxWindow *parent, sudoku::Board* board, wxWindowID id=wxID_ANY, const wxPoint &pos=wxDefaultPosition,
+  explicit SudokuGrid(wxWindow *parent, wxWindowID id=wxID_ANY, const wxPoint &pos=wxDefaultPosition,
              const wxSize &size=wxDefaultSize, long style=wxTAB_TRAVERSAL, const wxString &name=wxPanelNameStr);
   ~SudokuGrid() override = default;
 
+  bool Initialize(unsigned numClues);
+  bool Solve();
+  void Undo(unsigned steps = 1);
   void updateWidgets();
 
  private:
   void OnCellChanged(wxGridEvent& event);
   void OnEditorCreated(wxGridEditorCreatedEvent& event);
   void OnSize(wxSizeEvent& event);
+
 
   void CenterGrid();
   void FillGrid();
@@ -37,7 +41,8 @@ class SudokuGrid : public wxGrid
   void RecalcFontSize();
   void SetupBorders();
 
-  sudoku::Board* board_{nullptr};
+  std::vector<sudoku::Board>::iterator board_;
+  std::vector<sudoku::Board> history_;
   unsigned numFilledCells_;
   wxTextCtrl* openEditor_{nullptr};
  DECLARE_EVENT_TABLE()

@@ -9,12 +9,14 @@
 
 static const int ID_NEW_GAME = wxNewId();
 static const int ID_SOLVE = wxNewId();
+static const int ID_UNDO = wxNewId();
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
         EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
         EVT_MENU(wxID_EXIT, MainWindow::OnExit)
         EVT_MENU(ID_NEW_GAME, MainWindow::OnNewGame)
         EVT_MENU(ID_SOLVE, MainWindow::OnSolve)
+        EVT_MENU(ID_UNDO, MainWindow::OnUndo)
 wxEND_EVENT_TABLE()
 
 MainWindow::MainWindow(const wxString &title, const wxPoint &pos, const wxSize &size)
@@ -25,19 +27,23 @@ MainWindow::MainWindow(const wxString &title, const wxPoint &pos, const wxSize &
   menuFile->Append(ID_NEW_GAME, "New Game");
   menuFile->Append(wxID_EXIT);
   // ************************************************************
+  wxMenu *menuEdit = new wxMenu();
+  menuEdit->Append(ID_UNDO, "Undo");
+  // ************************************************************
   wxMenu *menuHelp = new wxMenu();
   menuHelp->Append(wxID_ABOUT);
   menuHelp->Append(ID_SOLVE, "Solve");
   // ************************************************************
   wxMenuBar *menuBar = new wxMenuBar();
   menuBar->Append(menuFile, "&File");
+  menuBar->Append(menuEdit, "&Edit");
   menuBar->Append(menuHelp, "&Help");
   // ************************************************************
   SetMenuBar(menuBar);
   CreateStatusBar();
   SetStatusText("Welcome to Sudoku!");
 
-  grid_ = new SudokuGrid(this, &board_);
+  grid_ = new SudokuGrid(this);
   auto *szr = new wxBoxSizer(wxHORIZONTAL);
   szr->Add(grid_, wxSizerFlags(1).Align(wxALIGN_CENTER).Expand());
   this->SetSizer(szr);
@@ -64,7 +70,7 @@ void MainWindow::OnSolve(wxCommandEvent &event)
                       "Confirmation",
                       wxYES_NO).ShowModal() == wxID_YES)
   {
-    board_.Solve();
+    grid_->Solve();
     updateWidgets();
   }
 }
@@ -84,7 +90,12 @@ void MainWindow::OnNewGame(wxCommandEvent &event)
     return;
   }
 
-  board_.Initialize(numClues);
+  grid_->Initialize(numClues);
+  updateWidgets();
+}
+void MainWindow::OnUndo(wxCommandEvent &event)
+{
+  grid_->Undo();
   updateWidgets();
 }
 
