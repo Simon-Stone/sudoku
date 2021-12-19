@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <chrono>
 #include <iterator>
 #include <random>
 #include <string>
@@ -37,7 +38,12 @@ bool Board::Solve()
     // No empty cell left in board!
     return true;
   }
-  for (unsigned value = 1; value <= 9; ++value)
+  // Create a random sequence of possible values
+  std::array<unsigned, 9> possibleValues{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  // Obtain a time-based seed:
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::shuffle(possibleValues.begin(), possibleValues.end(), std::default_random_engine(seed));
+  for (const auto& value : possibleValues)
   {
     if (IsValid(pos.first, pos.second, value))
     {
@@ -53,7 +59,7 @@ bool Board::Solve()
 
   return false;
 }
-bool Board::CheckBox(unsigned row, unsigned col)
+bool Board::CheckBox(unsigned row, unsigned col) const
 {
   return CheckSection(GetCol(col)) && CheckSection(GetRow(row)) && CheckSection(GetBox(row, col));
 }
@@ -196,15 +202,15 @@ void Board::SetCell(unsigned int rowIdx, unsigned int colIdx, unsigned int value
   }
   board_[rowIdx][colIdx] = value;
 }
-bool Board::IsInBox(unsigned int value, unsigned int rowIdx, unsigned int colIdx)
+bool Board::IsInBox(unsigned int value, unsigned int rowIdx, unsigned int colIdx) const
 {
   return IsInSection(value, GetBox(rowIdx, colIdx));
 }
-bool Board::IsInCol(unsigned int value, unsigned int colIdx)
+bool Board::IsInCol(unsigned int value, unsigned int colIdx) const
 {
   return IsInSection(value, GetCol(colIdx));
 }
-bool Board::IsInRow(unsigned int value, unsigned int rowIdx)
+bool Board::IsInRow(unsigned int value, unsigned int rowIdx) const
 {
   return IsInSection(value, GetRow(rowIdx));
 }
@@ -227,7 +233,7 @@ std::pair<unsigned, unsigned> Board::FindEmptyCell()
   }
   throw std::out_of_range("Could not find empty cell!");
 }
-bool Board::IsValid(unsigned int rowIdx, unsigned int colIdx, unsigned int value)
+bool Board::IsValid(unsigned int rowIdx, unsigned int colIdx, unsigned int value) const
 {
   return !IsInRow(value, rowIdx) && !IsInCol(value, colIdx) && !IsInBox(value, rowIdx, colIdx);
 }

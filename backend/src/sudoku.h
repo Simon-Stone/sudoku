@@ -25,14 +25,14 @@ class Board
   void SetBoard(const std::array<std::array<unsigned, 9>, 9>& board);
 
   bool CheckBoard();
-  bool CheckBox(unsigned row, unsigned col);
+  bool CheckBox(unsigned row, unsigned col) const;
   static bool CheckSection(const std::array<unsigned, 9>& section);
 
   bool Solve();
 
-  bool IsInBox(unsigned value, unsigned rowIdx, unsigned colIdx);
-  bool IsInCol(unsigned value, unsigned colIdx);
-  bool IsInRow(unsigned value, unsigned rowIdx);
+  bool IsInBox(unsigned value, unsigned rowIdx, unsigned colIdx) const;
+  bool IsInCol(unsigned value, unsigned colIdx) const;
+  bool IsInRow(unsigned value, unsigned rowIdx) const;
   static bool IsInSection(unsigned value, const std::array<unsigned, 9>& section);
 
   [[nodiscard]] std::array<unsigned, 9> GetBox(unsigned rowIdx, unsigned colIdx) const;
@@ -47,7 +47,7 @@ class Board
 
  private:
   std::pair<unsigned, unsigned> FindEmptyCell();
-  bool IsValid(unsigned rowIdx, unsigned colIdx, unsigned value);
+  bool IsValid(unsigned rowIdx, unsigned colIdx, unsigned value) const;
 
  private:
   std::array<std::array<unsigned, 9>, 9> board_{std::array<unsigned, 9>{0}};
