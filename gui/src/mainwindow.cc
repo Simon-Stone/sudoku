@@ -11,6 +11,7 @@
 static const int ID_NEW_GAME = wxNewId();
 static const int ID_SOLVE = wxNewId();
 static const int ID_REDO = wxNewId();
+static const int ID_RESET = wxNewId();
 static const int ID_UNDO = wxNewId();
 
 
@@ -20,8 +21,10 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
         EVT_MENU(ID_NEW_GAME, MainWindow::OnNewGame)
         EVT_MENU(ID_SOLVE, MainWindow::OnSolve)
         EVT_MENU(ID_REDO, MainWindow::OnRedo)
+        EVT_MENU(ID_RESET, MainWindow::OnReset)
         EVT_MENU(ID_UNDO, MainWindow::OnUndo)
         EVT_UPDATE_UI(ID_REDO, MainWindow::OnUpdateUI)
+        EVT_UPDATE_UI(ID_RESET, MainWindow::OnUpdateUI)
         EVT_UPDATE_UI(ID_UNDO, MainWindow::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
@@ -49,8 +52,11 @@ MainWindow::MainWindow(const wxString &title, const wxPoint &pos, const wxSize &
   SetMenuBar(menuBar);
   // ************************************************************
   auto* toolBar = CreateToolBar();
+  toolBar->AddTool(ID_NEW_GAME, "New Game", wxArtProvider::GetBitmap(wxART_NEW));
+  toolBar->AddTool(ID_RESET, "Reset Game", wxArtProvider::GetBitmap(wxART_GOTO_FIRST));
   toolBar->AddTool(ID_UNDO, "Undo", wxArtProvider::GetBitmap(wxART_UNDO));
   toolBar->AddTool(ID_REDO, "Redo", wxArtProvider::GetBitmap(wxART_REDO));
+  toolBar->AddTool(ID_SOLVE, "Solve", wxArtProvider::GetBitmap(wxART_TIP));
   toolBar->Realize();
   // ************************************************************
   CreateStatusBar();
@@ -118,7 +124,7 @@ void MainWindow::OnUndo(wxCommandEvent &event)
 }
 void MainWindow::OnUpdateUI(wxUpdateUIEvent &event)
 {
-  if(event.GetId() == ID_UNDO)
+  if(event.GetId() == ID_UNDO || event.GetId() == ID_RESET)
   {
     event.Enable(grid_->UndoStepsLeft() > 0);
   }
@@ -126,6 +132,11 @@ void MainWindow::OnUpdateUI(wxUpdateUIEvent &event)
   {
     event.Enable(grid_->RedoStepsLeft() > 0);
   }
+}
+void MainWindow::OnReset(wxCommandEvent &event)
+{
+  grid_->Undo(grid_->UndoStepsLeft());
+  updateWidgets();
 }
 
 
