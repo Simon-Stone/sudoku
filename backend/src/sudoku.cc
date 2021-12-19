@@ -7,61 +7,85 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <iterator>
+#include <random>
+#include <string>
 #include <stdexcept>
 
-std::vector<std::vector<unsigned>> Sudoku::GetInitializedBoard(unsigned int num_clues)
+
+
+using namespace sudoku;
+
+Board::Board(const std::array<std::array<unsigned, 9>, 9> &board) : board_(board)
 {
-  auto grid = std::vector<std::vector<unsigned>>(9, std::vector<unsigned>(9, 0));
-
-
-  return grid;
 }
-std::vector<std::vector<unsigned>> Sudoku::Solve(std::vector<std::vector<unsigned int>> board)
-{
-  auto currentRow = 0;
-  auto currentCol = 0;
 
-  for (unsigned num = 1; num <= 9; ++num)
+bool Board::Initialize(unsigned int num_clues)
+{
+  board_ = std::array<std::array<unsigned, 9>, 9>();
+  return true;
+}
+bool Board::Solve()
+{
+  std::pair<unsigned, unsigned> pos;  // row index, column index
+  try
   {
-    board[currentRow][currentCol] = num;
-    Check(board, currentRow, currentCol);
+    pos = FindEmptyCell();
+  }
+  catch(std::out_of_range&)
+  {
+    // No empty cell left in board!
+    return true;
+  }
+  for (unsigned value = 1; value <= 9; ++value)
+  {
+    if (IsValid(pos.first, pos.second, value))
+    {
+      board_[pos.first][pos.second] = value;
+      if (Solve())
+      {
+        return true;
+      }
+      // If this does not help solve the sudoku, unassign cell and move on
+      board_[pos.first][pos.second] = 0;
+    }
   }
 
-  return {};
+  return false;
 }
-bool Sudoku::Check(const std::vector<std::vector<unsigned int>> &board, unsigned row, unsigned col)
+bool Board::CheckBox(unsigned row, unsigned col)
 {
-  return Check(GetCol(board, col)) && Check(GetRow(board, row)) && Check(GetBox(board, row, col));
+  return CheckSection(GetCol(col)) && CheckSection(GetRow(row)) && CheckSection(GetBox(row, col));
 }
-bool Sudoku::Check(const std::vector<std::vector<unsigned int>> &board)
+bool Board::CheckBoard()
 {
   // Check all rows
-  for(unsigned i = 0; i < board.size(); ++i)
+  for(unsigned i = 0; i < board_.size(); ++i)
   {
-    if (!Check(GetRow(board, i)))
+    if (!CheckSection(GetRow(i)))
       return false;
   }
 
   // Check all columns
-  for(unsigned i = 0; i < board[0].size(); ++i)
+  for(unsigned i = 0; i < board_[0].size(); ++i)
   {
-    if (!Check(GetCol(board, i)))
+    if (!CheckSection(GetCol(i)))
       return false;
   }
 
   // Check all boxes
-  for(unsigned i = 1; i < board.size(); i += 3)
+  for(unsigned i = 1; i < board_.size(); i += 3)
   {
-    for(unsigned j = 1; j < board[0].size(); j += 3)
+    for(unsigned j = 1; j < board_[0].size(); j += 3)
     {
-      if (!Check(board, i, j))
+      if (!CheckBox(i, j))
         return false;
     }
   }
   // All checks passed
   return true;
 }
-bool Sudoku::Check(const std::vector<unsigned int> &section)
+bool Board::CheckSection(const std::array<unsigned, 9> &section)
 {
    // Check the section
    assert(section.size() == 9);
@@ -84,20 +108,21 @@ bool Sudoku::Check(const std::vector<unsigned int> &section)
    }
    return true;
 }
-std::vector<unsigned> Sudoku::GetCol(const std::vector<std::vector<unsigned int>> &board, unsigned colIdx)
+std::array<unsigned, 9> Board::GetCol(unsigned colIdx) const
 {
-  std::vector<unsigned> col;
-  for (const auto& row : board)
+  std::array<unsigned, 9> col{0};
+  int pos = 0;
+  for (const auto& row : board_)
   {
-    col.push_back(row[colIdx]);
+    col[pos++] = row[colIdx];
   }
   return col;
 }
-std::vector<unsigned> Sudoku::GetRow(const std::vector<std::vector<unsigned int>> &board, unsigned rowIdx)
+std::array<unsigned, 9> Board::GetRow(unsigned rowIdx) const
 {
-  return board[rowIdx];
+  return board_[rowIdx];
 }
-std::vector<unsigned> Sudoku::GetBox(const std::vector<std::vector<unsigned int>> &board, unsigned rowIdx, unsigned colIdx)
+std::array<unsigned, 9> Board::GetBox(unsigned rowIdx, unsigned colIdx) const
 {
   std::array<unsigned, 3> rowRange = {0, 0, 0};
   std::array<unsigned, 3> colRange = {0, 0, 0};
@@ -135,13 +160,90 @@ std::vector<unsigned> Sudoku::GetBox(const std::vector<std::vector<unsigned int>
       throw std::runtime_error("Out of range!");
   }
 
-  std::vector<unsigned> box;
+  std::array<unsigned, 9> box{};
+  int pos = 0;
   for(const auto& r : rowRange)
   {
     for(const auto& c : colRange)
     {
-      box.push_back(board[r][c]);
+      box[pos++] = board_[r][c];
     }
   }
   return box;
 }
+std::array<std::array<unsigned, 9>, 9> Board::GetBoard() const
+{
+  return board_;
+}
+
+void Board::SetBoard(const std::array<std::array<unsigned, 9>, 9>& board)
+{
+  board_ = board;
+}
+unsigned Board::GetNumberCols() const
+{
+  return board_[0].size();
+}
+unsigned Board::GetNumberRows() const
+{
+  return board_.size();
+}
+void Board::SetCell(unsigned int rowIdx, unsigned int colIdx, unsigned int value)
+{
+  if (value < 1 || value > 9)
+  {
+    throw std::out_of_range("[Board::SetCell()] Passe value was out of range:" + std::to_string(value));
+  }
+  board_[rowIdx][colIdx] = value;
+}
+bool Board::IsInBox(unsigned int value, unsigned int rowIdx, unsigned int colIdx)
+{
+  return IsInSection(value, GetBox(rowIdx, colIdx));
+}
+bool Board::IsInCol(unsigned int value, unsigned int colIdx)
+{
+  return IsInSection(value, GetCol(colIdx));
+}
+bool Board::IsInRow(unsigned int value, unsigned int rowIdx)
+{
+  return IsInSection(value, GetRow(rowIdx));
+}
+bool Board::IsInSection(unsigned int value, const std::array<unsigned int, 9> &section)
+{
+  return std::find(section.begin(), section.end(), value) != section.end();
+}
+std::pair<unsigned, unsigned> Board::FindEmptyCell()
+{
+  unsigned rowIdx, colIdx;
+  for (rowIdx = 0; rowIdx < GetNumberRows(); ++rowIdx)
+  {
+    for(colIdx = 0; colIdx < GetNumberCols(); ++colIdx)
+    {
+      if (board_[rowIdx][colIdx] == 0)
+      {
+        return {rowIdx, colIdx};
+      }
+    }
+  }
+  throw std::out_of_range("Could not find empty cell!");
+}
+bool Board::IsValid(unsigned int rowIdx, unsigned int colIdx, unsigned int value)
+{
+  return !IsInRow(value, rowIdx) && !IsInCol(value, colIdx) && !IsInBox(value, rowIdx, colIdx);
+}
+std::ostream &sudoku::operator<<(std::ostream &os, const Board &board)
+{
+  os << "-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\n";
+  for(const auto& row : board.board_)
+  {
+    os << "|\t";
+    for(const auto& number : row)
+    {
+      os << number << "\t";
+    }
+    os << "|\n";
+  }
+  os << "-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\n";
+  return os;
+}
+
