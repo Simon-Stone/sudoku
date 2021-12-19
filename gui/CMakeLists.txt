@@ -14,4 +14,5 @@ add_executable(gui WIN32
 
 set_property(TARGET gui PROPERTY VS_DPI_AWARE PerMonitor)
 target_include_directories(gui PRIVATE ${wxWidgets_INCLUDE_DIRS})
+target_include_directories(gui PUBLIC ${PROJECT_SOURCE_DIR}/backend/include)
 target_link_libraries(gui LINK_PUBLIC ${wxWidgets_LIBRARIES} backend)
