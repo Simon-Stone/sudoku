@@ -24,6 +24,7 @@ class MainWindow : public wxFrame
   void OnNewGame(wxCommandEvent &event);
   void OnSolve(wxCommandEvent &event);
   void OnUndo(wxCommandEvent &event);
+  void OnUpdateUI(wxUpdateUIEvent &event);
 
   void updateWidgets();
  wxDECLARE_EVENT_TABLE();

@@ -280,5 +280,9 @@ void SudokuGrid::Undo(unsigned steps)
   history_.erase(std::next(board_), history_.end());
   updateWidgets();
 }
+unsigned SudokuGrid::HistorySize() const
+{
+  return history_.size();
+}
 
 

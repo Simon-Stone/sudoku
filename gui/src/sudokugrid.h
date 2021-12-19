@@ -26,6 +26,7 @@ class SudokuGrid : public wxGrid
   bool Solve();
   void Undo(unsigned steps = 1);
   void updateWidgets();
+  [[nodiscard]] unsigned HistorySize() const;
 
  private:
   void OnCellChanged(wxGridEvent& event);

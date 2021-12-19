@@ -5,6 +5,7 @@
 #include "mainwindow.h"
 
 #include <wx/aboutdlg.h>
+#include <wx/artprov.h>
 #include <wx/numdlg.h>
 
 static const int ID_NEW_GAME = wxNewId();
@@ -17,6 +18,7 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
         EVT_MENU(ID_NEW_GAME, MainWindow::OnNewGame)
         EVT_MENU(ID_SOLVE, MainWindow::OnSolve)
         EVT_MENU(ID_UNDO, MainWindow::OnUndo)
+        EVT_UPDATE_UI(ID_UNDO, MainWindow::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
 MainWindow::MainWindow(const wxString &title, const wxPoint &pos, const wxSize &size)
@@ -40,9 +42,14 @@ MainWindow::MainWindow(const wxString &title, const wxPoint &pos, const wxSize &
   menuBar->Append(menuHelp, "&Help");
   // ************************************************************
   SetMenuBar(menuBar);
+  // ************************************************************
+  auto* toolBar = CreateToolBar();
+  toolBar->AddTool(ID_UNDO, "Undo", wxArtProvider::GetBitmap(wxART_UNDO));
+  toolBar->Realize();
+  // ************************************************************
   CreateStatusBar();
   SetStatusText("Welcome to Sudoku!");
-
+  // ************************************************************
   grid_ = new SudokuGrid(this);
   auto *szr = new wxBoxSizer(wxHORIZONTAL);
   szr->Add(grid_, wxSizerFlags(1).Align(wxALIGN_CENTER).Expand());
@@ -97,6 +104,10 @@ void MainWindow::OnUndo(wxCommandEvent &event)
 {
   grid_->Undo();
   updateWidgets();
+}
+void MainWindow::OnUpdateUI(wxUpdateUIEvent &event)
+{
+  event.Enable(grid_->HistorySize() > 1);
 }
 
 
