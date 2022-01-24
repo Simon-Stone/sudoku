@@ -8,12 +8,14 @@
 
 #include <wx/valnum.h>
 
-
+static const int ID_HINT = wxNewId();
 
 wxBEGIN_EVENT_TABLE(SudokuGrid, wxGrid)
   EVT_SIZE(SudokuGrid::OnSize)
   EVT_GRID_CELL_CHANGED(SudokuGrid::OnCellChanged)
+  EVT_GRID_CELL_RIGHT_CLICK(SudokuGrid::OnRightClick)
   EVT_GRID_EDITOR_CREATED(SudokuGrid::OnEditorCreated)
+  EVT_MENU(ID_HINT, SudokuGrid::OnHint)
 wxEND_EVENT_TABLE()
 
 namespace
@@ -129,10 +131,11 @@ void SudokuGrid::CenterGrid()
   auto whitespace = (size.GetWidth() - this->GetGridWidth()) / 2;
 
   this->SetColSize(0, whitespace);
-  for (int i = 1; i < this->GetNumberCols(); ++i)
+  for (int i = 1; i < this->GetNumberCols() - 1; ++i)
   {
     this->SetColSize(i, this->GetRowSize(0));
   }
+  this->SetColSize(this->GetNumberCols() - 1, whitespace);
 }
 
 int SudokuGrid::GetGridWidth()
@@ -296,6 +299,36 @@ void SudokuGrid::Redo(unsigned int steps)
       return;
   }
   board_ += steps;
+  updateWidgets();
+}
+void SudokuGrid::OnRightClick(wxGridEvent& event)
+{
+  wxPoint point = event.GetPosition();
+  SetGridCursor(event.GetRow(), event.GetCol());
+  wxMenu *menu = new wxMenu();
+  menu->Append(ID_HINT, "Get a hint");
+  PopupMenu( menu, point);
+}
+void SudokuGrid::OnHint(wxCommandEvent &event)
+{
+  // The grid coordinates are off by one from the board coordinates
+  auto row = GetGridCursorRow() - 1;
+  auto col = GetGridCursorCol() - 1;
+
+  history_.push_back(*board_);
+  board_ = std::prev(history_.end());
+  history_.erase(std::next(board_), history_.end());
+  try
+  {
+    (*board_).SetCell(row, col, (*board_).GetHint(row, col));
+  }
+  catch (std::out_of_range&)
+  {
+    history_.erase(history_.begin(), board_);
+    board_ = history_.begin();
+    wxMessageBox("Please start a new game first!", "No active game", wxICON_INFORMATION);
+  }
+
   updateWidgets();
 }
 

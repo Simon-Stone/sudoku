@@ -54,6 +54,7 @@ bool Board::Initialize(unsigned int num_clues)
   {
     board_[cell.first.first][cell.first.second] = cell.second;
   }
+  solution_ = solvedBoard.GetBoard();
   return true;
 }
 bool Board::Solve()
@@ -310,5 +311,9 @@ bool Board::operator==(const Board &rhs) const
 bool Board::operator!=(const Board &rhs) const
 {
   return !(rhs == *this);
+}
+unsigned Board::GetHint(unsigned int row, unsigned int col) const
+{
+  return solution_[row][col];
 }
 

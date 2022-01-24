@@ -43,6 +43,8 @@ class Board
   [[nodiscard]] std::array<unsigned, 9> GetRow(unsigned rowIdx) const;
   [[nodiscard]] unsigned GetNumberRows() const;
 
+  unsigned GetHint(unsigned row, unsigned col) const;
+
   unsigned GetCell(unsigned rowIdx, unsigned colIdx);
   void SetCell(unsigned rowIdx, unsigned colIdx, unsigned value);
 
@@ -58,6 +60,7 @@ class Board
 
  private:
   std::array<std::array<unsigned, 9>, 9> board_{std::array<unsigned, 9>{0}};
+  std::array<std::array<unsigned, 9>, 9> solution_{std::array<unsigned, 9>{0}};
 };
 
 };

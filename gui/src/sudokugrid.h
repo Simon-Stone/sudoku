@@ -33,6 +33,8 @@ class SudokuGrid : public wxGrid
  private:
   void OnCellChanged(wxGridEvent& event);
   void OnEditorCreated(wxGridEditorCreatedEvent& event);
+  void OnHint(wxCommandEvent& event);
+  void OnRightClick(wxGridEvent& event);
   void OnSize(wxSizeEvent& event);
 
 
